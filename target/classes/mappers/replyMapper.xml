@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<!-- 다른 mapper와 중복되지 않도록 네임스페이스 기재 -->
+<mapper namespace="reply">
+    
+    <!-- 댓글 입력 -->
+    <insert id="insertReply">
+        <!-- INSERT INTO tbl_reply (idx, replytext, replyer, secret_reply)
+        VALUES (#{idx}, #{replytext}, #{replyer}, #{secretReply}) -->
+        INSERT INTO tbl_reply (idx, replytext, replyer, secret_reply)
+        VALUES (#{idx}, #{replytext}, "test", #{secretReply})
+    </insert>
+    
+    <!-- 댓글 목록 -->
+    <select id="listReply" resultType="com.smsoft.spring02.model.board.dto.ReplyVO">
+<!--         SELECT rno, idx, replytext, replyer, user_name AS userName, r.wdate, r.updatedate
+        FROM tbl_reply r, tbl_member m
+        WHERE r.replyer = m.user_id AND idx=#{idx}
+        ORDER BY rno -->
+	SELECT
+		r.idx, idx, r.replytext, r.replyer, r.secret_reply AS secretReply, r.wdate,
+		r.updatedate,
+		m.user_name AS userName,
+		(SELECT writer FROM tbl_board WHERE idx = r.idx) AS writer
+	FROM tbl_reply r, tbl_member m
+	WHERE
+		r.replyer = m.user_id
+	AND idx = #{idx}
+		ORDER BY rno
+		limit #{start}, 10
+    </select>
+    
+        <!-- 댓글 갯수(페이징처리) -->
+    <select id="countReply" resultType="int">
+        SELECT COUNT(*) FROM tbl_reply WHERE idx=#{idx}
+    </select>
+    
+</mapper>
